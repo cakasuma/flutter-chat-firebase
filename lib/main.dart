@@ -4,7 +4,6 @@ import 'package:flutter/cupertino.dart';
 
 import 'pages/home.dart';
 import 'pages/login.dart';
-import 'pages/signup.dart';
 
 final ThemeData kIOSTheme = ThemeData(
   primarySwatch: Colors.orange,
@@ -31,7 +30,6 @@ class ChatApp extends StatelessWidget {
         home: LoginPage(),
         routes: <String, WidgetBuilder> {
           '/login': (BuildContext context) => ChatApp(),
-          '/signup': (BuildContext context) => SignupPage(),
           '/home': (BuildContext context) => ChatScreen()
         },
         );
