@@ -7,36 +7,47 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
 
-  String _email;
-  String _password;
+  bool _isLoading;
+
+  Widget _showLogo() {
+    return Hero(
+      tag: 'hero',
+      child: Padding(
+        padding: EdgeInsets.only(top: 70),
+        child: CircleAvatar(
+          backgroundColor: Colors.lightBlue,
+          radius: 48,
+          child: Text('F'),
+        ),
+      ),
+    );
+  }
+
+  Widget _showCircularProgress() {
+    if (_isLoading) {
+      return Center(
+        child: CircularProgressIndicator()
+      );
+    } else {
+      return Container(
+        height: 0,
+        width: 0,
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    final _isIos = Theme.of(context).platform == TargetPlatform.iOS;
     return Scaffold(
       appBar: AppBar(
         title: Text('Login to Chat App'),
       ),
-      body: Container(
-        margin: EdgeInsets.all(8),
-        child: Row(
-          children: <Widget>[
-            RaisedButton(
-              child: Text('Login'),
-              onPressed: () {
-                Navigator.of(context).pushNamed('/home');
-              },
-              color: Colors.blue,
-            ),
-            RaisedButton(
-              child: Text('Signup'),
-              onPressed: () {
-                Navigator.of(context).pushNamed('/signup');
-              },
-              color: Colors.blue,
-            ),
-          ],
-        ),
-      ),
+      body: Stack(
+        children: <Widget>[
+
+        ],
+      )
     );
   }
 }
