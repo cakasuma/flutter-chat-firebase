@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 enum FormMode { LOGIN, SIGNUP }
 
@@ -200,5 +201,38 @@ class _LoginPageState extends State<LoginPage> {
     });
   }
 
-  void _validateAndSubmit() {}
+  void _validateAndSubmit() async {
+    setState(() {
+      _errorMessage = "";
+      _isLoading = true;
+    });
+    if (_validateAndSave()) {
+      String userId = "";
+
+      try {
+        if (_formMode == FormMode.LOGIN) {
+        }
+      } catch(e) {
+        print('Error: $e');
+        setState(() {
+          _isLoading = false;
+          if (_isIos) {
+            _errorMessage = e.details;
+          } else {
+            _errorMessage = e.message;
+          }
+        });
+      }
+    }
+  }
+
+  bool _validateAndSave() {
+    final form = _formKey.currentState;
+    if (form.validate()) {
+      form.save();
+      return true;
+    }
+
+    return false;
+  }
 }
