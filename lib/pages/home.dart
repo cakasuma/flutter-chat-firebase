@@ -1,12 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:tutorial_firebase/services/authentication.dart';
 
 import '../shared/constants.dart';
 
 const String _name = "amam";
 
 class ChatScreen extends StatefulWidget {
+  ChatScreen({ Key key, this.userId, this.auth, this.onSignedOut}): super(key: key);
+
+  final String userId;
+  final BaseAuth auth;
+  final VoidCallback onSignedOut;
+
   @override
   _ChatScreenState createState() => _ChatScreenState();
 }
@@ -72,9 +79,15 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
     );
   }
 
-  void _logoutClick(String choice) {
+  void _logoutClick(String choice) async {
     if(choice == Constants.Logout) {
-      Navigator.of(context).pushNamed('/login');
+    try {
+      await widget.auth.signOut();
+      widget.onSignedOut();
+      } catch (e) {
+      print(e);
+      }
+      // Navigator.of(context).pushNamed('/login');
     }
   }
 

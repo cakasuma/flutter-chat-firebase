@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:tutorial_firebase/services/authentication.dart';
 
 enum FormMode { LOGIN, SIGNUP }
 
 class LoginPage extends StatefulWidget {
+
+  LoginPage({ this.auth, this.onSignedIn });
+  final BaseAuth auth;
+  final VoidCallback onSignedIn;
+
   @override
   _LoginPageState createState() => _LoginPageState();
 }
@@ -16,6 +22,7 @@ class _LoginPageState extends State<LoginPage> {
   String _password;
   String _errorMessage;
   FormMode _formMode = FormMode.LOGIN;
+
 
   Widget _showEmailInput() {
     return Padding(
@@ -76,17 +83,6 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  Widget _showCircularProgress() {
-    if (_isLoading) {
-      return Center(child: CircularProgressIndicator());
-    } else {
-      return Container(
-        height: 0,
-        width: 0,
-      );
-    }
-  }
-
   Widget _showPrimaryButton() {
     return Container(
       margin: EdgeInsets.only(top: 45),
@@ -130,13 +126,21 @@ class _LoginPageState extends State<LoginPage> {
 
   Widget _showErrorMessage() {
     if (_errorMessage.length > 0 && _errorMessage != null) {
-      return Text(
-        _errorMessage,
-        style: TextStyle(
-            fontSize: 13,
-            color: Colors.red,
-            height: 1,
-            fontWeight: FontWeight.w300),
+      return AlertDialog(
+        title: Text('Warning'),
+        content: Text(
+          _errorMessage
+        ),
+        actions: <Widget>[
+          FlatButton(
+            child: Text('Regret'),
+            onPressed: () {
+              setState(() {
+                _errorMessage = "";
+              });
+            },
+          ),
+        ],
       );
     } else {
       return Container(
@@ -158,7 +162,6 @@ class _LoginPageState extends State<LoginPage> {
             _showPasswordInput(),
             _showPrimaryButton(),
             _showSecondaryButton(),
-            _showErrorMessage()
           ],
         ),
       ),
@@ -174,7 +177,10 @@ class _LoginPageState extends State<LoginPage> {
           title: Text('Login to Chat App'),
         ),
         body: Stack(
-          children: <Widget>[_showBody(), _showCircularProgress()],
+          children: <Widget>[
+            _showBody(),
+            _showErrorMessage()
+          ],
         ));
   }
 
@@ -207,10 +213,25 @@ class _LoginPageState extends State<LoginPage> {
       _isLoading = true;
     });
     if (_validateAndSave()) {
+      print('somethingwrong');
       String userId = "";
-
       try {
         if (_formMode == FormMode.LOGIN) {
+          userId = await widget.auth.signIn(_email, _password);
+          print('Signed in: $userId');
+        } else {
+          userId = await widget.auth.signUp(_email, _password);
+          widget.auth.sendEmailVerification();
+          _showVerifyEmailSentDialog();
+          print('Signed up user: $userId');
+        }
+
+        setState(() {
+          _isLoading = false;
+        });
+
+        if (userId.length > 0 && userId != null && _formMode == FormMode.LOGIN) {
+          widget.onSignedIn();
         }
       } catch(e) {
         print('Error: $e');
@@ -223,7 +244,31 @@ class _LoginPageState extends State<LoginPage> {
           }
         });
       }
+    } else {
+      print('correct');
     }
+  }
+
+    void _showVerifyEmailSentDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        // return object of type Dialog
+        return AlertDialog(
+          title: new Text("Verify your account"),
+          content: new Text("Link to verify account has been sent to your email"),
+          actions: <Widget>[
+            new FlatButton(
+              child: new Text("Dismiss"),
+              onPressed: () {
+                _changeFormToLogin();
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   bool _validateAndSave() {
